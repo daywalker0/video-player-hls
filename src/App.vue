@@ -4,16 +4,20 @@
       <video ref="videoEl" class="video-player" @timeupdate="updateTime"></video>
       <button @click="togglePlayPause" class="control-btn control-btn-big">{{ isPlaying ? '❚❚' : '▶' }}</button>
       <div class="custom-controls">
-        <div class="left-controls">
-          <button @click="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
-          <button @click="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
+        <div class="custom-controls-range">
+          <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
         </div>
-        <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
-        <button @click="toggleFullscreen" class="control-btn">⛶</button>
+        <div class="custom-controls-buttons">
+          <div class="left-controls">
+            <button @click="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
+            <button @click="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
+            <span class="time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
+          </div>
+          <button @click="toggleFullscreen" class="control-btn">⛶</button>
+        </div>
       </div>
     </div>
     <div class="player-info">
-      <p>Текущая позиция: {{ currentTime }} сек</p>
       <p>Размер буфера: {{ bufferSize }} сек</p>
     </div>
   </div>
@@ -96,6 +100,12 @@ const seekVideo = () => {
   videoEl.value.currentTime = currentTime.value;
 };
 
+const formatTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
 onMounted(() => {
   initPlayer();
 });
@@ -124,23 +134,30 @@ onUnmounted(() => {
   height: auto;
   background: black;
   display: block;
+  border-radius: 10px;
 }
 
 .custom-controls {
   position: absolute;
   bottom: 10px;
   display: flex;
+  flex-direction: column;
   width: 100%;
   padding: 0 10px;
-  align-items: center;
-  gap: 10px;
+  gap: 5px;
   opacity: 0.8;
   transition: opacity 0.3s;
+}
+
+.custom-controls-buttons {
+  display: flex;
+  justify-content: space-between;
 }
 
 .left-controls {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .seek-bar {
@@ -183,6 +200,10 @@ onUnmounted(() => {
   margin-top: 10px;
   padding: 10px;
   background: #f5f5f5;
-  border-radius: 5px;
+  border-radius: 10px;
+}
+
+.time {
+  color: #f5f5f5;
 }
 </style>
