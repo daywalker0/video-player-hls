@@ -83,6 +83,7 @@ const initPlayer = () => {
 
   video.onloadedmetadata = () => {
     videoDuration.value = Math.floor(video.duration);
+    emitPlayerState();
   };
 };
 
@@ -107,6 +108,8 @@ const emitPlayerState = () => {
     isMuted: isMuted.value,
     areSubtitlesOn: areSubtitlesOn.value,
     isFullscreen: !!document.fullscreenElement,
+    currentTime: currentTime.value,
+    videoDuration: videoDuration.value,
   });
 };
 
@@ -130,19 +133,16 @@ const toggleMute = () => {
 const toggleFullscreen = () => {
   const video = videoEl.value;
   if (!document.fullscreenElement) {
-    video.requestFullscreen().catch(err => {
-      console.error('Ошибка при входе в полноэкранный режим:', err);
-    });
+    video.requestFullscreen().catch(err => console.error('Ошибка:', err));
   } else {
-    document.exitFullscreen().catch(err => {
-      console.error('Ошибка при выходе из полноэкранного режима:', err);
-    });
+    document.exitFullscreen().catch(err => console.error('Ошибка:', err));
   }
   emitPlayerState();
 };
 
 const seekVideo = () => {
   videoEl.value.currentTime = currentTime.value;
+  emitPlayerState();
 };
 
 const formatTime = (seconds) => {

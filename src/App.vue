@@ -16,6 +16,8 @@ const playerState = ref({
   isMuted: false,
   areSubtitlesOn: true,
   isFullscreen: false,
+  currentTime: 0,
+  videoDuration: 0,
 });
 
 const updateBufferSize = (size) => {
