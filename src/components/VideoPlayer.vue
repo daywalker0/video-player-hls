@@ -1,13 +1,11 @@
 <template>
   <div class="video-wrapper">
     <div class="video-src-input">
-      <input
-        type="text"
-        v-model="videoSrc"
-        placeholder="Введите URL видео (m3u8 или mp4)"
-        @keyup.enter="loadVideo"
-      />
-      <button @click="loadVideo">Загрузить</button>
+      <select id="videoOptions" @change="loadVideo" v-model="videoSrc" @keyup.enter="loadVideo">
+        <option v-for="option in videoOptions" :key="option.url" :value="option.url">
+          {{ option.url }}
+        </option>
+      </select>
     </div>
 
     <div
@@ -72,6 +70,13 @@ const subtitleTracks = ref([]);
 let hls = null;
 
 const videoSrc = ref('https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8');
+
+const videoOptions = ref([
+  { url: 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8' },
+  { url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
+  { url: 'https://cdn.jwplayer.com/manifests/pZxWPRg4.m3u8' },
+  { url: 'https://playertest.longtailvideo.com/adaptive/captions/playlist.m3u8' }
+]);
 
 const initPlayer = () => {
   const video = videoEl.value;
@@ -256,7 +261,7 @@ onUnmounted(() => {
   gap: 10px;
 }
 
-.video-src-input input {
+.video-src-input select {
   flex: 1;
   padding: 5px;
   border: 1px solid #ccc;
