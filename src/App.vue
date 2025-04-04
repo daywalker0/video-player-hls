@@ -31,10 +31,11 @@ const updatePlayerState = (state) => {
 
 <style scoped>
 .player-container {
-  max-width: 1200px;
-  margin: 20px auto;
+  max-width: 900px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-self: center;
   gap: 20px;
 }
 </style>

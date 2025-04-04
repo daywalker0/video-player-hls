@@ -1,41 +1,53 @@
 <template>
-  <div
-    @mousemove="showControls"
-    @mouseleave="hideControls"
-    @click="handlePlayerClick"
-    tabindex="0"
-    class="video-wrapper"
-  >
-    <video ref="videoEl" class="video-player" @timeupdate="updateTime">
-      <track
-        ref="subtitleTrack"
-        kind="subtitles"
-        label="English"
-        srclang="en"
-        default
+  <div class="video-wrapper">
+    <div class="video-src-input">
+      <input
+        type="text"
+        v-model="videoSrc"
+        placeholder="Введите URL видео (m3u8 или mp4)"
+        @keyup.enter="loadVideo"
       />
-    </video>
-    <button
-      :class="{ 'control-btn': true, 'control-btn-big': true, 'active': isShowedControls }"
-    >
-      {{ isPlaying ? '❚❚' : '▶' }}
-    </button>
+      <button @click="loadVideo">Загрузить</button>
+    </div>
+
     <div
-      :class="{ 'custom-controls': true, 'active': isShowedControls }"
-      @click.stop
+      @mousemove="showControls"
+      @mouseleave="hideControls"
+      @click="handlePlayerClick"
+      tabindex="0"
+      class="video-player-container"
     >
-      <div class="custom-controls-range">
-        <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
-      </div>
-      <div class="custom-controls-buttons">
-        <div class="left-controls">
-          <button @click.stop="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
-          <button @click.stop="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
-          <span class="time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
+      <video ref="videoEl" class="video-player" @timeupdate="updateTime">
+        <track
+          ref="subtitleTrack"
+          kind="subtitles"
+          label="English"
+          srclang="en"
+          default
+        />
+      </video>
+      <button
+        :class="{ 'control-btn': true, 'control-btn-big': true, 'active': isShowedControls }"
+      >
+        {{ isPlaying ? '❚❚' : '▶' }}
+      </button>
+      <div
+        :class="{ 'custom-controls': true, 'active': isShowedControls }"
+        @click.stop
+      >
+        <div class="custom-controls-range">
+          <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
         </div>
-        <div class="right-controls">
-          <button @click.stop="toggleSubtitles" class="control-btn">{{ areSubtitlesOn ? 'CC' : 'CC-' }}</button>
-          <button @click.stop="toggleFullscreen" class="control-btn">⛶</button>
+        <div class="custom-controls-buttons">
+          <div class="left-controls">
+            <button @click.stop="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
+            <button @click.stop="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
+            <span class="time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
+          </div>
+          <div class="right-controls">
+            <button @click.stop="toggleSubtitles" class="control-btn">{{ areSubtitlesOn ? 'CC' : 'CC-' }}</button>
+            <button @click.stop="toggleFullscreen" class="control-btn">⛶</button>
+          </div>
         </div>
       </div>
     </div>
@@ -59,13 +71,20 @@ const areSubtitlesOn = ref(true);
 const subtitleTracks = ref([]);
 let hls = null;
 
+const videoSrc = ref('https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8');
+
 const initPlayer = () => {
   const video = videoEl.value;
-  const videoSrc = 'https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8';
+  if (!video) return;
 
-  if (Hls.isSupported()) {
+  if (hls) {
+    hls.destroy();
+    hls = null;
+  }
+
+  if (Hls.isSupported() && videoSrc.value.endsWith('.m3u8')) {
     hls = new Hls();
-    hls.loadSource(videoSrc);
+    hls.loadSource(videoSrc.value);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       console.log('Манифест загружен');
@@ -73,18 +92,36 @@ const initPlayer = () => {
       if (subtitleTracks.value.length > 0) {
         hls.subtitleTrack = areSubtitlesOn.value ? 0 : -1;
       }
+      video.play().catch(() => console.log('Автовоспроизведение заблокировано'));
     });
     hls.on(Hls.Events.BUFFER_APPENDED, () => {
       updateBufferSize();
     });
-  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = videoSrc;
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      console.error('Ошибка HLS:', data);
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl') && videoSrc.value.endsWith('.m3u8')) {
+    video.src = videoSrc.value;
+    video.play().catch(() => console.log('Автовоспроизведение заблокировано'));
+  } else {
+    video.src = videoSrc.value;
+    video.play().catch(() => console.log('Автовоспроизведение заблокировано'));
   }
 
   video.onloadedmetadata = () => {
     videoDuration.value = Math.floor(video.duration);
     emitPlayerState();
   };
+};
+
+const loadVideo = () => {
+  const video = videoEl.value;
+  if (!video || !videoSrc.value) return;
+
+  video.pause();
+  isPlaying.value = false;
+  currentTime.value = 0;
+  initPlayer();
 };
 
 const updateTime = () => {
@@ -175,7 +212,9 @@ const handlePlayerClick = () => {
 };
 
 const handleKeyPress = (event) => {
-  event.preventDefault();
+  if ([' ', 'c', 'm', 'f'].includes(event.key.toLowerCase())) {
+    event.preventDefault();
+  }
   switch (event.key.toLowerCase()) {
     case ' ':
       togglePlayPause();
@@ -206,10 +245,42 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-
 .video-wrapper {
   position: relative;
   width: 100%;
+}
+
+.video-src-input {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.video-src-input input {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.video-src-input button {
+  padding: 5px 10px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.video-src-input button:hover {
+  background-color: #0056b3;
+}
+
+.video-player-container {
+  position: relative;
+  max-width: 900px;
+  min-width: 900px;
 }
 
 .video-player {
