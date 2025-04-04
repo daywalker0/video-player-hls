@@ -2,8 +2,12 @@
   <div class="player-container">
     <div class="video-wrapper">
       <video ref="videoEl" class="video-player" @timeupdate="updateTime"></video>
+      <button @click="togglePlayPause" class="control-btn control-btn-big">{{ isPlaying ? '❚❚' : '▶' }}</button>
       <div class="custom-controls">
-        <button @click="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
+        <div class="left-controls">
+          <button @click="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
+          <button @click="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
+        </div>
         <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
         <button @click="toggleFullscreen" class="control-btn">⛶</button>
       </div>
@@ -23,6 +27,8 @@ const videoEl = ref(null);
 const currentTime = ref(0);
 const bufferSize = ref(0);
 const isPlaying = ref(false);
+const isMuted = ref(false);
+const videoDuration = ref(0);
 let hls = null;
 
 const initPlayer = () => {
@@ -42,11 +48,16 @@ const initPlayer = () => {
   } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src = videoSrc;
   }
+
+  video.onloadedmetadata = () => {
+    videoDuration.value = Math.floor(video.duration);
+  };
 };
 
 const updateTime = () => {
-  currentTime.value = Math.floor(videoEl.value.currentTime);
-  isPlaying.value = !videoEl.value.paused;
+  const video = videoEl.value;
+  currentTime.value = Math.floor(video.currentTime);
+  isPlaying.value = !video.paused;
 };
 
 const updateBufferSize = () => {
@@ -65,6 +76,13 @@ const togglePlayPause = () => {
     video.pause();
   }
 };
+
+const toggleMute = () => {
+  const video = videoEl.value;
+  video.muted = !video.muted;
+  isMuted.value = video.muted;
+};
+
 const toggleFullscreen = () => {
   const video = videoEl.value;
   if (!document.fullscreenElement) {
@@ -72,6 +90,10 @@ const toggleFullscreen = () => {
   } else {
     document.exitFullscreen();
   }
+};
+
+const seekVideo = () => {
+  videoEl.value.currentTime = currentTime.value;
 };
 
 onMounted(() => {
@@ -110,10 +132,15 @@ onUnmounted(() => {
   display: flex;
   width: 100%;
   padding: 0 10px;
-  justify-content: space-between;
+  align-items: center;
   gap: 10px;
   opacity: 0.8;
   transition: opacity 0.3s;
+}
+
+.left-controls {
+  display: flex;
+  gap: 10px;
 }
 
 .seek-bar {
@@ -137,6 +164,15 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.control-btn-big {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
 }
 
 .control-btn:hover {
