@@ -1,9 +1,20 @@
 <template>
   <div class="player-container">
-    <div class="video-wrapper">
-      <video ref="videoEl" class="video-player" @timeupdate="updateTime"></video>
-      <button @click="togglePlayPause" class="control-btn control-btn-big">{{ isPlaying ? '❚❚' : '▶' }}</button>
-      <div class="custom-controls">
+    <div
+      @mousemove="showControls"
+      @mouseleave="hideControls"
+      class="video-wrapper"
+    >
+      <video ref="videoEl" class="video-player" @timeupdate="updateTime" />
+      <button
+        :class="{ 'control-btn': true, 'control-btn-big': true, 'active': isShowedControls }"
+        @click="togglePlayPause"
+      >
+        {{ isPlaying ? '❚❚' : '▶' }}
+      </button>
+      <div
+        :class="{ 'custom-controls': true, 'active': isShowedControls }"
+      >
         <div class="custom-controls-range">
           <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
         </div>
@@ -33,6 +44,7 @@ const bufferSize = ref(0);
 const isPlaying = ref(false);
 const isMuted = ref(false);
 const videoDuration = ref(0);
+const isShowedControls = ref(false)
 let hls = null;
 
 const initPlayer = () => {
@@ -106,6 +118,14 @@ const formatTime = (seconds) => {
   return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+const showControls = () => {
+  isShowedControls.value = true
+}
+
+const hideControls = () => {
+  isShowedControls.value = false
+}
+
 onMounted(() => {
   initPlayer();
 });
@@ -119,7 +139,7 @@ onUnmounted(() => {
 
 <style scoped>
 .player-container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 20px auto;
   font-family: Arial, sans-serif;
 }
@@ -139,14 +159,26 @@ onUnmounted(() => {
 
 .custom-controls {
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 10px;
+  padding: 10px;
   gap: 5px;
+  background-color: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+.custom-controls.active {
   opacity: 0.8;
-  transition: opacity 0.3s;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
+}
+
+.custom-controls:hover {
+  opacity: 1;
 }
 
 .custom-controls-buttons {
@@ -165,15 +197,9 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.video-wrapper:hover .custom-controls {
-  opacity: 1;
-}
-
 .control-btn {
   width: 40px;
   height: 40px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -181,6 +207,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
 .control-btn-big {
@@ -190,10 +217,20 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   width: 100px;
   height: 100px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s;
+}
+
+.control-btn-big.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s;
 }
 
 .control-btn:hover {
-  background-color: rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #f5f5f5;
 }
 
 .player-info {
