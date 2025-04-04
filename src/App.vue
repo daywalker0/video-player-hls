@@ -5,7 +5,15 @@
       @mouseleave="hideControls"
       class="video-wrapper"
     >
-      <video ref="videoEl" class="video-player" @timeupdate="updateTime" />
+      <video ref="videoEl" class="video-player" @timeupdate="updateTime">
+        <track
+          ref="subtitleTrack"
+          kind="subtitles"
+          label="English"
+          srclang="en"
+          default
+        />
+      </video>
       <button
         :class="{ 'control-btn': true, 'control-btn-big': true, 'active': isShowedControls }"
         @click="togglePlayPause"
@@ -24,7 +32,10 @@
             <button @click="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
             <span class="time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
           </div>
-          <button @click="toggleFullscreen" class="control-btn">⛶</button>
+          <div class="right-controls">
+            <button @click="toggleSubtitles" class="control-btn">{{ areSubtitlesOn ? 'CC' : 'CC-' }}</button>
+            <button @click="toggleFullscreen" class="control-btn">⛶</button>
+          </div>
         </div>
       </div>
     </div>
@@ -39,12 +50,15 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import Hls from 'hls.js';
 
 const videoEl = ref(null);
+const subtitleTrack = ref(null);
 const currentTime = ref(0);
 const bufferSize = ref(0);
 const isPlaying = ref(false);
 const isMuted = ref(false);
 const videoDuration = ref(0);
-const isShowedControls = ref(false)
+const isShowedControls = ref(false);
+const areSubtitlesOn = ref(true);
+const subtitleTracks = ref([]);
 let hls = null;
 
 const initPlayer = () => {
@@ -57,6 +71,10 @@ const initPlayer = () => {
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       console.log('Манифест загружен');
+      subtitleTracks.value = hls.subtitleTracks;
+      if (subtitleTracks.value.length > 0) {
+        hls.subtitleTrack = areSubtitlesOn.value ? 0 : -1;
+      }
     });
     hls.on(Hls.Events.BUFFER_APPENDED, () => {
       updateBufferSize();
@@ -119,11 +137,21 @@ const formatTime = (seconds) => {
 };
 
 const showControls = () => {
-  isShowedControls.value = true
-}
+  isShowedControls.value = true;
+};
 
 const hideControls = () => {
-  isShowedControls.value = false
+  isShowedControls.value = false;
+};
+
+const toggleSubtitles = () => {
+  if (hls && subtitleTracks.value.length > 0) {
+    areSubtitlesOn.value = !areSubtitlesOn.value;
+    hls.subtitleTrack = areSubtitlesOn.value ? 0 : -1;
+  } else if (videoEl.value.textTracks.length > 0) {
+    areSubtitlesOn.value = !areSubtitlesOn.value;
+    videoEl.value.textTracks[0].mode = areSubtitlesOn.value ? 'showing' : 'hidden';
+  }
 }
 
 onMounted(() => {
@@ -186,7 +214,7 @@ onUnmounted(() => {
   justify-content: space-between;
 }
 
-.left-controls {
+.left-controls, .right-controls {
   display: flex;
   gap: 10px;
   align-items: center;
