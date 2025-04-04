@@ -3,6 +3,7 @@
     <div
       @mousemove="showControls"
       @mouseleave="hideControls"
+      @click="handlePlayerClick"
       class="video-wrapper"
     >
       <video ref="videoEl" class="video-player" @timeupdate="updateTime">
@@ -16,25 +17,25 @@
       </video>
       <button
         :class="{ 'control-btn': true, 'control-btn-big': true, 'active': isShowedControls }"
-        @click="togglePlayPause"
       >
         {{ isPlaying ? '❚❚' : '▶' }}
       </button>
       <div
         :class="{ 'custom-controls': true, 'active': isShowedControls }"
+        @click.stop
       >
         <div class="custom-controls-range">
           <input type="range" v-model="currentTime" :max="videoDuration" @input="seekVideo" class="seek-bar" />
         </div>
         <div class="custom-controls-buttons">
           <div class="left-controls">
-            <button @click="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
-            <button @click="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
+            <button @click.stop="togglePlayPause" class="control-btn">{{ isPlaying ? '❚❚' : '▶' }}</button>
+            <button @click.stop="toggleMute" class="control-btn">{{ isMuted ? '🔇' : '🔊' }}</button>
             <span class="time">{{ formatTime(currentTime) }} / {{ formatTime(videoDuration) }}</span>
           </div>
           <div class="right-controls">
-            <button @click="toggleSubtitles" class="control-btn">{{ areSubtitlesOn ? 'CC' : 'CC-' }}</button>
-            <button @click="toggleFullscreen" class="control-btn">⛶</button>
+            <button @click.stop="toggleSubtitles" class="control-btn">{{ areSubtitlesOn ? 'CC' : 'CC-' }}</button>
+            <button @click.stop="toggleFullscreen" class="control-btn">⛶</button>
           </div>
         </div>
       </div>
@@ -152,7 +153,11 @@ const toggleSubtitles = () => {
     areSubtitlesOn.value = !areSubtitlesOn.value;
     videoEl.value.textTracks[0].mode = areSubtitlesOn.value ? 'showing' : 'hidden';
   }
-}
+};
+
+const handlePlayerClick = (event) => {
+  togglePlayPause();
+};
 
 onMounted(() => {
   initPlayer();
