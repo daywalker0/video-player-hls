@@ -100,6 +100,8 @@ const formatTime = (seconds) => {
   -webkit-justify-content: space-between;
   -ms-flex-pack: justify;
   justify-content: space-between;
+  color: black;
+  align-items: center;
   @media screen and (max-width: 599px) {
     font-size: 13px;
   }
@@ -119,6 +121,8 @@ const formatTime = (seconds) => {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  color: black;
+  align-items: center;
   @media screen and (max-width: 599px) {
     font-size: 13px;
   }
