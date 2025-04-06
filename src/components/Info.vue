@@ -77,6 +77,8 @@ const formatTime = (seconds) => {
 .player-info {
   padding: 10px;
   background: #f5f5f5;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
   border-radius: 10px;
 }
 
@@ -92,13 +94,20 @@ const formatTime = (seconds) => {
 }
 
 .list-item-block {
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-justify-content: space-between;
+  -ms-flex-pack: justify;
   justify-content: space-between;
   @media screen and (max-width: 599px) {
     font-size: 13px;
   }
   @media screen and (max-width: 350px) {
     font-size: 12px;
+  }
+  p {
+    color: rgba(0, 0, 0, 0.8);
   }
   span {
     color: black;
@@ -107,12 +116,17 @@ const formatTime = (seconds) => {
 }
 
 .list-item-block-info {
+  display: -webkit-flex;
+  display: -ms-flexbox;
   display: flex;
   @media screen and (max-width: 599px) {
     font-size: 13px;
   }
   @media screen and (max-width: 350px) {
     font-size: 12px;
+  }
+  p {
+    color: rgba(0, 0, 0, 0.8);
   }
   span {
     margin-left: 5px;
@@ -126,6 +140,7 @@ const formatTime = (seconds) => {
 }
 
 h2 {
+  color: black;
   @media screen and (max-width: 599px) {
     font-size: 16px;
   }
