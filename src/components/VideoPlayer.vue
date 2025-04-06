@@ -267,6 +267,11 @@ onUnmounted(() => {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 14px;
+  width: 100%;
+  @media screen and (max-width: 599px) {
+    gap: 0;
+    font-size: 10px;
+  }
 }
 
 .video-src-input button {
@@ -285,7 +290,7 @@ onUnmounted(() => {
 .video-player-container {
   position: relative;
   max-width: 900px;
-  min-width: 900px;
+  width: 100%;
 }
 
 .video-player {
@@ -347,6 +352,11 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   background-color: rgba(255, 255, 255, 0.8);
+  @media screen and (max-width: 599px) {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
 }
 
 .control-btn-big {
@@ -359,6 +369,10 @@ onUnmounted(() => {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0s 0.3s;
+  @media screen and (max-width: 599px) {
+    width: 50px;
+    height: 50px;
+  }
 }
 
 .control-btn-big.active {

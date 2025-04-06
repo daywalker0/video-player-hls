@@ -5,8 +5,8 @@
       <ul class="list">
         <li class="list-item">
           <div class="list-item-block">
-            <p>Воспроизведение / Пауза: <span>Пробел (Space)</span></p>
-            <span>{{ playerState.isPlaying ? 'Воспроизведение' : 'Пауза' }}</span>
+            <p>Воспроизведение / Пауза: <span>Space</span></p>
+            <span>{{ playerState.isPlaying ? '▶' : '❚❚' }}</span>
           </div>
         </li>
         <li class="list-item">
@@ -84,9 +84,22 @@ const formatTime = (seconds) => {
   margin-bottom: 15px;
 }
 
+.list {
+  @media screen and (max-width: 599px) {
+    margin-top: 10px;
+    padding: 0 0 0 20px;
+  }
+}
+
 .list-item-block {
   display: flex;
   justify-content: space-between;
+  @media screen and (max-width: 599px) {
+    font-size: 13px;
+  }
+  @media screen and (max-width: 350px) {
+    font-size: 12px;
+  }
   span {
     color: black;
     font-weight: 700;
@@ -95,6 +108,12 @@ const formatTime = (seconds) => {
 
 .list-item-block-info {
   display: flex;
+  @media screen and (max-width: 599px) {
+    font-size: 13px;
+  }
+  @media screen and (max-width: 350px) {
+    font-size: 12px;
+  }
   span {
     margin-left: 5px;
     color: black;
@@ -104,6 +123,12 @@ const formatTime = (seconds) => {
 
 .info {
   margin-top: 15px;
+}
+
+h2 {
+  @media screen and (max-width: 599px) {
+    font-size: 16px;
+  }
 }
 
 p {
